@@ -192,41 +192,59 @@ Zaimplementuj:
 - odczyt i wyświetlenie listy rekordów;
 - otwarcie szczegółów wybranego rekordu.
 
-**Powiązanie z wymaganiami biznesowymi (ID wymagań):** [uzupełnij]
+**Powiązanie z wymaganiami biznesowymi (ID wymagań):**
 
-| Operacja         | Lokalizacja kodu | Reguła walidacji / zachowanie | Wynik |
-| ---------------- | ---------------- | ----------------------------- | ----- |
-| Create           | [ ]              | [ ]                           | [ ]   |
-| Read (lista)     | [ ]              | [ ]                           | [ ]   |
-| Read (szczegóły) | [ ]              | [ ]                           | [ ]   |
+- **MOB-003-FR-02** (Tworzenie i przeglądanie rekordów "cel")
+- **MOB-003-FR-04** (Wyświetlanie listy oraz widoku szczegółów)
+- **MOB-003-FR-08** (Walidacja pól obowiązkowych)
+- **MOB-003-FR-11** (Zachowanie danych po ponownym uruchomieniu aplikacji)
+- **MOB-003-BR-03** (Puste nazwy niedozwolone, poprawne formaty)
+
+| Operacja         | Lokalizacja kodu           | Reguła walidacji / zachowanie                                                                                                                          | Wynik                                                                             |
+| ---------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| Create           | `src/app/form.tsx`         | **1.** Pole `nazwa` nie może być puste.<br>**2.** Pole `termin` musi spełniać format daty `YYYY-MM-DD` (wyrażenie regularne).                          | Komunikat błędu (Alert) w razie niespełnienia reguł. Po sukcesie powrót do listy. |
+| Read (lista)     | `src/app/index.tsx`        | Brak bezpośredniej walidacji (stan pusty obsłużony właściwością `ListEmptyComponent` w komponencie FlatList).                                          | Płynne wyświetlenie wszystkich Celów z lokalnej pamięci.                          |
+| Read (szczegóły) | `src/app/details/[id].tsx` | Odnalezienie rekordu na podstawie dynamicznego parametru `id` z URL (Expo Router). Jeśli brak id, renderuje się widok zastępczy "Nie znaleziono celu". | Prawidłowe wyświetlenie danych pojedynczego Celu w wyizolowanym widoku.           |
 
 **Wyjaśnij przepływ danych po naciśnięciu przycisku „Zapisz”:**
 
-[od UI przez logikę i repozytorium do zapisu, a następnie odświeżenia widoku]
+**Wyjaśnij przepływ danych po naciśnięciu przycisku „Zapisz”:**
+
+1. **Warstwa Prezentacji (UI):** Użytkownik klika przycisk "Zapisz", co uruchamia funkcję `handleSave()` w lokalnym komponencie formularza.
+2. **Warstwa Logiki (Walidacja):** Funkcja weryfikuje zawartość lokalnego stanu pól (czy nazwa nie jest pusta i czy data ma odpowiedni format). Jeśli walidacja kończy się błędem, proces jest natychmiast przerywany, a na ekranie (bezpośrednio nad polami formularza) pojawia się dedykowany czerwony komunikat tekstowy z ostrzeżeniem.
+3. **Modyfikacja Stanu (Zustand):** Jeśli dane są poprawne, komponent formuje obiekt `Cel` (generując unikalne ID biblioteką `react-native-uuid`) i wywołuje akcję `addCel(nowyCel)`. `Zustand` aktualizuje globalną tablicę w pamięci operacyjnej (RAM).
+4. **Zapis do Magazynu (Storage):** Skonfigurowane oprogramowanie pośredniczące (Middleware `persist` z Zustand) automatycznie wykrywa mutację stanu. Bez udziału widoków przechwytuje nową tablicę celów, serializuje ją do formatu JSON i nadpisuje wartość w module `AsyncStorage` (trwały zapis w fizycznej pamięci urządzenia dla zachowania danych).
+5. **Odświeżenie Widoku (Reaktywność):** Ponieważ komponent "Listy" subskrybuje globalny stan przez hook `useGoalStore`, reactowe drzewo komponentów automatycznie renderuje go ponownie. Następuje wymuszona nawigacja (`router.replace('/')`), a użytkownik widzi zaktualizowaną listę z nowo zdefiniowanym celem.
 
 ## T5. Weryfikacja działania i wnioski
 
 Przeprowadź testy manualne i podaj rzeczywiste wyniki.
 
-| ID    | Scenariusz                           | Oczekiwany rezultat             | Wynik (PASS/FAIL) | Dowód / uwagi |
-| ----- | ------------------------------------ | ------------------------------- | ----------------- | ------------- |
-| TC-01 | Dodanie poprawnego rekordu           | Rekord jest zapisany i widoczny | [ ]               | [ ]           |
-| TC-02 | Próba zapisu pustego wymaganego pola | Zapis zablokowany, komunikat    | [ ]               | [ ]           |
-| TC-03 | Otwarcie szczegółów rekordu          | Poprawne dane rekordu           | [ ]               | [ ]           |
-| TC-04 | Ponowne uruchomienie aplikacji       | Rekord pozostaje dostępny       | [ ]               | [ ]           |
-| TC-05 | Brak rekordów                        | Czytelny stan pustej listy      | [ ]               | [ ]           |
+| ID    | Scenariusz                           | Oczekiwany rezultat             | Wynik (PASS/FAIL) | Dowód / uwagi                                                                                                                                                                                        |
+| ----- | ------------------------------------ | ------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TC-01 | Dodanie poprawnego rekordu           | Rekord jest zapisany i widoczny | PASS              | Po wypełnieniu formularza i kliknięciu "Zapisz", aplikacja automatycznie wraca do głównego ekranu, a nowy cel jest od razu widoczny na liście (FlatList).                                            |
+| TC-02 | Próba zapisu pustego wymaganego pola | Zapis zablokowany, komunikat    | PASS              | Próba zapisu z pustym polem "Nazwa celu" skutkuje przerwaniem akcji i wyświetleniem czerwonego komunikatu błędu nad formularzem. Aplikacja nie dodaje pustego rekordu.                               |
+| TC-03 | Otwarcie szczegółów rekordu          | Poprawne dane rekordu           | PASS              | Kliknięcie przycisku "Szczegóły" na karcie celu poprawnie przekazuje `id` w parametrze ścieżki i renderuje ekran `details/[id].tsx` z właściwymi danymi (nazwa, termin, status).                     |
+| TC-04 | Ponowne uruchomienie aplikacji       | Rekord pozostaje dostępny       | PASS              | Po całkowitym restarcie aplikacji (lub odświeżeniu strony w przeglądarce), dzięki wykorzystaniu middleware `persist` i `AsyncStorage`, wpisane wcześniej cele są natychmiast ładowane i wyświetlane. |
+| TC-05 | Brak rekordów                        | Czytelny stan pustej listy      | PASS              | Przy braku elementów w stanie globalnym (Zustand), komponent `FlatList` poprawnie renderuje zdefiniowany `ListEmptyComponent` z informacją: "Brak celów. Dodaj pierwszy!".                           |
 
 **Najważniejszy napotkany problem i sposób rozwiązania:**
 
-[uzupełnij]
+- **Problem:** Konflikt domyślnego szablonu nawigacji Expo (opartego na zakładkach/Tabs) z klasycznym stosem nawigacyjnym (Stack) oraz problemy z testowaniem formularza w środowisku webowym (Expo Web). Po odświeżeniu strony, funkcja `router.back()` przestała działać (brak historii przeglądarki), a natywny `Alert.alert()` dla walidacji nie wyświetlał się niezawodnie.
+- **Rozwiązanie:** Całkowite redagowanie pliku `_layout.tsx` do postaci czystego stosu (`<Stack>`), co przywróciło natywne zachowanie przełączania ekranów. Dodatkowo, w formularzu zastąpiono alerty systemowe warunkowym renderowaniem czerwonego tekstu błędu bezpośrednio w interfejsie (co poprawiło UX), a `router.back()` zamieniono na wymuszające przekierowanie `router.replace('/')`.
 
 **Co wymaga dalszej pracy przed laboratorium 3?**
 
-[uzupełnij]
+Zgodnie z indywidualną specyfikacją biznesową (MOB-003), w kolejnym etapie projektu (Lab 3) wymagana będzie:
+
+1. Implementacja ekranu i formularza dla encji podrzędnej **"Kamień milowy"** oraz powiązanie jej z wybranym "Celem" (klucz obcy `parentId`).
+2. Wdrożenie złożonej logiki domenowej: walidacja sprawdzająca, czy data etapu nie przekracza daty głównego celu (MOB-003-BR-01).
+3. Obliczanie i wyświetlanie na ekranie listy/szczegółów procentu ukończonych kamieni milowych (MOB-003-FR-10).
+4. Zabezpieczenie przed usuwaniem: wdrożenie blokady uniemożliwiającej usunięcie "Celu", jeśli posiada on przypisane do siebie jakiekolwiek "Kamienie milowe" (MOB-003-BR-04).
 
 **Wnioski (3–6 zdań, odnoszące się do własnej implementacji):**
 
-[uzupełnij]
+Implementacja drugiej części laboratorium potwierdziła słuszność wyboru frameworka React Native oraz biblioteki Zustand, które wspólnie pozwoliły na zwinne zbudowanie responsywnej i modularnej aplikacji. Zastosowanie nawigacji opartej na Expo Router (układ Stack) okazało się bardzo intuicyjne dla wzorca Master-Detail, choć wymagało ręcznego nadpisania domyślnych szablonów, aby uniknąć błędów podczas przełączania ekranów. Integracja globalnego stanu z modułem AsyncStorage skutecznie zrealizowała kluczowy wymóg biznesowy dotyczący trwałego zapisu danych w trybie offline-first, eliminując potrzebę wdrażania zewnętrznego backendu. Dodatkowo, przeniesienie komunikatów walidacyjnych z systemowych okienek (Alert) na dedykowane teksty błędów w interfejsie znacząco poprawiło ergonomię formularza i stabilność w środowisku webowym. Zbudowana w ten sposób architektura bazowa CRUD dla głównej encji "Cel" stanowi stabilny fundament do wdrożenia złożonych reguł domenowych dla "Kamieni milowych" w kolejnym laboratorium.
 
 ## Materiały dowodowe i historia pracy
 
