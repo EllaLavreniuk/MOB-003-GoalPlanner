@@ -248,21 +248,21 @@ Implementacja drugiej części laboratorium potwierdziła słuszność wyboru fr
 
 ## Materiały dowodowe i historia pracy
 
-- Issue(s): [linki]
-- Pull Request(s): [linki]
-- Commity związane z laboratorium: [SHA / linki]
-- Diagramy: [ścieżki]
-- Zrzuty ekranu: [ścieżki, np. `reports/assets/lab-02/`]
-- Instrukcja uruchomienia: [link do README]
+- **Pull Request(s):** [https://github.com/EllaLavreniuk/MOB-003-GoalPlanner/pull/3](https://github.com/EllaLavreniuk/MOB-003-GoalPlanner/pull/3)
+- **Commity związane z laboratorium:**
+  - `feat(models): add Cel and KamienMilowy data types with 1:N relation`
+  - `feat(navigation): implement list, form and details screens with Zustand and AsyncStorage`
+  - `feat: complete base screens, state management and docs for lab-02`
+  - `docs: complete T4 and T5 manual testing section in lab-02 report`
+- **Diagramy:** [`docs/architecture.md`](../architecture.md)
+- **Zrzuty ekranu:**
+  - `docs/images/EkranListyCelow.jpg`
+  - `docs/images/EkranSzczwgolyCelu.jpg`
+  - `docs/images/EkranFormularzCelu.jpg`
+- **Instrukcja uruchomienia:** [`README.md`](../../README.md)
 
 ## Użycie narzędzi AI (jeżeli dotyczy)
 
-**Narzędzie i zakres wsparcia:** [np. wyjaśnienie błędu konfiguracji / propozycja porównania]
-**Jak zweryfikowano wynik:** [dokumentacja, uruchomienie, test]
-**Elementy wykonane samodzielnie:** [opis]
-
-**Warunki formalne:** sprawozdanie w Markdown, czytelne odnośniki do działającego kodu i diagramów, zrzuty ekranu renderujące się w repozytorium, identyfikacja autora i projektu. Oceniana jest zarówno implementacja, jak i zdolność wyjaśnienia własnych decyzji. Brak dowodów wykonania może ograniczyć liczbę punktów.
-
-```
-
-```
+**Narzędzie i zakres wsparcia:** LLM (Google Gemini) – wsparcie przy rozwiązaniu błędu konfiguracji domyślnego szablonu Expo Router (nadpisywanie nagłówków przez układ Tabs), refaktoryzacja logiki formularza pod kątem działania w środowisku webowym (zamiana `router.back()` na `router.replace('/')` oraz wdrożenie tekstowych komunikatów błędu zamiast systemowych alertów), a także pomoc w składni konfiguracji globalnego stanu (Zustand + AsyncStorage).
+**Jak zweryfikowano wynik:** Uruchomienie aplikacji w środowisku deweloperskim (Expo Web / localhost), przeprowadzenie testów manualnych dla operacji dodawania celów, weryfikacja walidacji formularza oraz sprawdzenie trwałości danych po odświeżeniu strony (Storage).
+**Elementy wykonane samodzielnie:** Konfiguracja środowiska lokalnego, zarządzanie repozytorium Git (tworzenie gałęzi `feature/...`, commity zgodne ze standardem Conventional Commits, przeprowadzanie operacji Pull Request i Merge), definiowanie modeli danych w TypeScript, przygotowanie materiałów oraz sporządzenie z laboratorium.
