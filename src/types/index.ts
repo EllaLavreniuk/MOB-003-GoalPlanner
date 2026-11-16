@@ -1,15 +1,15 @@
-export type StatusCelu = "Aktywny" | "Zakoñczony" | "Anulowany";
+export type StatusCelu = "Aktywny" | "ZakoÅ„czony" | "Anulowany";
 
-// Encja podrzêdna (N)
+// Encja podrzÄ™dna (N)
 export interface KamienMilowy {
   id: string; // UUID
-  parentId: string; // Klucz obcy wskazuj¹cy na Cel.id
+  parentId: string; // Klucz obcy wskazujÄ…cy na Cel.id
   nazwa: string;
   termin: string; // Data w formacie ISO (YYYY-MM-DD)
   ukonczony: boolean;
 }
 
-// Encja nadrzêdna (1)
+// Encja nadrzÄ™dna (1)
 export interface Cel {
   id: string; // UUID
   nazwa: string;
