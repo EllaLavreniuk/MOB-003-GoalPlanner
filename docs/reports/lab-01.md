@@ -1,7 +1,7 @@
 # Sprawozdanie — Laboratorium 1
 
 **Przedmiot:** Budowa aplikacji mobilnych z użyciem technologii frontendowych  
-**Student / identyfikator:** [uzupełnij]  
+**Student / identyfikator:** Lavreniuk Ella
 **Projekt biznesowy:** MOB-003 – GoalPlanner  
 **Framework:** React Native  
 **Data zajęć:** [2026-10-22]
